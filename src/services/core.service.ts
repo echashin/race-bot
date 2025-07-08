@@ -14,22 +14,22 @@ export class CoreService {
     private readonly chatBotService: ChatBotService,
   ) {}
 
-  @Cron(CronExpression.EVERY_MINUTE)
+  @Cron(CronExpression.EVERY_5_MINUTES)
   async short() {
     const from = format(new Date(), 'yyyy-MM-dd HH:mm:ss');
     const to = format(add(new Date(), { days: 3 }), 'yyyy-MM-dd HH:mm:ss');
     await this.sync(from, to);
   }
 
-  @Cron(CronExpression.EVERY_5_MINUTES)
+  @Cron('0 18 * * *')
   async long() {
     const from = format(add(new Date(), { days: 3 }), 'yyyy-MM-dd HH:mm:ss');
     const to = format(add(new Date(), { months: 3 }), 'yyyy-MM-dd HH:mm:ss');
     await this.sync(from, to);
+    await this.sqliteService.deleteOldRecords();
   }
 
   private async sync(from, to) {
-    await this.sqliteService.deleteOldRecords();
     await this.gqlService.login();
     await this.gqlService.getHosts();
     const newRecords: BookingDetails[] = [];
@@ -57,8 +57,6 @@ export class CoreService {
         }
       }
     }
-
-    console.dir(newRecords, { depth: 20 });
 
     for (const record of newRecords) {
       if (record.status === 'ACTIVE') {

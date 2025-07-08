@@ -3,6 +3,8 @@ import { gql, request } from 'graphql-request';
 import { ConfigService } from '@nestjs/config';
 import { EnvConfig } from '../core/configs/env';
 import { BookingDetails } from '../dto/booking-details.dto';
+import * as jwt from 'jsonwebtoken';
+import { getUnixTime } from 'date-fns';
 
 @Injectable()
 export class GqlService {
@@ -14,7 +16,20 @@ export class GqlService {
   constructor(private readonly configService: ConfigService<EnvConfig>) {}
 
   async login() {
-    this.accessToken = null;
+    if (this.accessToken) {
+      const data: {
+        company_id: string;
+        expires: number;
+        issued: number;
+        refresh_token: number;
+      } = jwt.decode(this.accessToken);
+
+      const endDate = data.issued + data.expires;
+      if (endDate > getUnixTime(new Date())) {
+        return;
+      }
+    }
+
     const document = gql`
       mutation login {
         login(
@@ -35,7 +50,7 @@ export class GqlService {
       );
       this.accessToken = result.login.access_token;
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   }
 
@@ -56,8 +71,6 @@ export class GqlService {
           {},
           { authorization: 'Bearer ' + this.accessToken },
         );
-      console.log(result.hostsOverview);
-
       this.hosts = Object.fromEntries(
         result.hostsOverview.map((host: { id: number; alias: string }) => [
           host.id,
@@ -65,7 +78,7 @@ export class GqlService {
         ]),
       );
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   }
 
@@ -138,7 +151,7 @@ export class GqlService {
         return await Promise.all(promises);
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   }
 }

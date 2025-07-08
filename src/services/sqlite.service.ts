@@ -77,7 +77,6 @@ export class SqliteService {
   async deleteOldRecords(): Promise<boolean> {
     const stmt = this.db.prepare('DELETE FROM records WHERE toDate < ?');
     const unixTime = getUnixTime(new Date());
-    console.log({ unixTime });
     const result = stmt.run(unixTime);
     return result.changes > 0;
   }
