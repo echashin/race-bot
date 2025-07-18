@@ -1,17 +1,10 @@
 import { Transform, Type } from 'class-transformer';
-import {
-  IsDefined,
-  IsEnum,
-  IsNotEmpty,
-  IsNumber,
-  IsString,
-} from 'class-validator';
-import { EnvironmentModeEnum } from './environment-mode.enum';
+import { IsDefined, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class EnvConfig {
-  @IsDefined()
-  @IsEnum(EnvironmentModeEnum)
-  NODE_ENV: EnvironmentModeEnum;
+  // @IsDefined()
+  // @IsEnum(EnvironmentModeEnum)
+  // NODE_ENV: EnvironmentModeEnum;
 
   @IsString()
   @IsNotEmpty()
@@ -33,24 +26,17 @@ export class EnvConfig {
   @IsNotEmpty()
   @IsDefined()
   @Type(() => Number)
-  HTTP_PORT: number;
+  HTTP_PORT: number = 3000;
 
   @IsString()
   @IsNotEmpty()
   @IsDefined()
-  HTTP_SERVER: string;
+  HTTP_SERVER: string = '0.0.0.0';
 
   @IsString()
   @IsNotEmpty()
   @IsDefined()
   TG_BOT_TOKEN: string;
-
-  @IsNumber()
-  @Transform(({ value }) => +value)
-  @IsNotEmpty()
-  @IsDefined()
-  @Type(() => Number)
-  CHAT_BOT_MESSAGES_AMOUNT: number;
 
   @IsString()
   @IsNotEmpty()

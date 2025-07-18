@@ -149,6 +149,8 @@ export class GqlService {
           ({ id }: { id: number; alias: string }) => this.getBooking(id),
         );
         return await Promise.all(promises);
+      } else {
+        return [];
       }
     } catch (err) {
       console.error(err);
